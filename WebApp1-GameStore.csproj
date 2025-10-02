@@ -1,0 +1,12 @@
+
+<!-- in this file we will declare all dependencies and libraries we want to use them  -->
+<Project Sdk="Microsoft.NET.Sdk.Web">
+ 
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>WebApp1_GameStore</RootNamespace>
+  </PropertyGroup>
+
+</Project>
