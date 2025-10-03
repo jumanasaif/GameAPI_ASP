@@ -1,10 +1,12 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace WebApp1_GameStore.DTOs;
 
 public record class CreateGameDto
 (
-    string GameName,
-    string Kind,
-    decimal Price,
+    [Required][StringLength(50)] string GameName,
+    [Required][StringLength(50)] string Kind,
+    [Range(1, 100)] decimal Price,
     DateOnly ReleaseDate
 
 );

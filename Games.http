@@ -9,9 +9,9 @@ POST http://localhost:5091/games
 Content-Type: application/json
 
 {
-  "GameName": "New Game",
+  "GameName":"New Game",
   "Kind": "JJJ",
-  "Price": 69.99,
+  "Price": 2000,
   "ReleaseDate": "2002-06-11"
 }
 
