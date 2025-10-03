@@ -1,1 +1,31 @@
-Get http://localhost:5091
+Get http://localhost:5091/games
+
+###
+
+Get http://localhost:5091/games/1
+
+###
+POST http://localhost:5091/games
+Content-Type: application/json
+
+{
+  "GameName": "New Game",
+  "Kind": "JJJ",
+  "Price": 69.99,
+  "ReleaseDate": "2002-06-11"
+}
+
+###
+PUT  http://localhost:5091/games/1
+Content-Type: application/json
+
+{
+  "GameName": "Street Fighter II",
+  "Kind": "Fighting",
+  "Price": 1000.99,
+  "ReleaseDate": "1999-07-15"
+}
+
+###
+
+DELETE http://localhost:5091/games/4

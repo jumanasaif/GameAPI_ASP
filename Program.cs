@@ -6,6 +6,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 var app = builder.Build();
 
+const string GetGameEndPoint = "GetGame";
+
 List<GameDto> games = [
     new(
         1,
@@ -30,6 +32,68 @@ List<GameDto> games = [
     ),
 ];
 
-app.MapGet("/", () => "Hello World!");
+// Get All Games:
+app.MapGet("games", () => games);
+
+
+// Get Specific Game:
+app.MapGet("games/{id}", handler: (int id) => games.Find(game => game.ID == id))
+    .WithName(GetGameEndPoint);
+
+
+// Add New Game:
+app.MapPost("games", (CreateGameDto NewGame) =>
+  {
+      GameDto game = new(
+      games.Count + 1,
+      NewGame.GameName,
+      NewGame.Kind,
+      NewGame.Price,
+      NewGame.ReleaseDate
+
+      );
+      games.Add(game);
+      return Results.CreatedAtRoute(GetGameEndPoint, new { id = game.ID }, game);
+
+
+  }
+
+);
+
+
+// Update Game:
+app.MapPut("games/{id}", (int id, UpdateGameDto UpdatedGame) =>
+{
+    int Index = games.FindIndex(game => game.ID == id);
+    games[Index] = new GameDto(
+         id,
+         UpdatedGame.GameName,
+         UpdatedGame.Kind,
+         UpdatedGame.Price,
+         UpdatedGame.ReleaseDate
+    );
+
+    return Results.NoContent();
+
+
+
+});
+
+
+// Delete Game:
+app.MapDelete("games/{id}", (int id) =>
+{
+    games.RemoveAll(game => game.ID == id);
+    return Results.NoContent();
+});
+
+
+// Delete All Games
+app.MapDelete("games", () =>
+{
+    games.Clear();
+    return Results.NoContent();
+});
+
 
 app.Run();
