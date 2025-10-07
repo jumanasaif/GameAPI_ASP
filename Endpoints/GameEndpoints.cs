@@ -1,5 +1,10 @@
 using System;
+using Microsoft.EntityFrameworkCore;
+using SQLitePCL;
+using WebApp1_GameStore.Data;
 using WebApp1_GameStore.DTOs;
+using WebApp1_GameStore.Entities;
+using WebApp1_GameStore.Mapping;
 
 namespace WebApp1_GameStore.Endpoints;
 
@@ -8,29 +13,6 @@ public static class GameEndpoints
 
     const string GetGameEndPoint = "GetGame";
 
-    private static readonly List<GameDto> games = [
-        new(
-        1,
-        "Street Fighter II",
-        "Fighting",
-        19.99M,
-        new DateOnly(1999,7,15)
-    ),
-     new(
-        2,
-        "Final Fantasy XIV",
-        "RolePlaying",
-        59.99M,
-        new DateOnly(2010,9,30)
-    ),
-       new(
-        3,
-        "FIFA 23",
-        "Sports",
-        69.99M,
-        new DateOnly(2022,9,27)
-    ),
-   ];
 
     public static RouteGroupBuilder MapGameEndPoints(this WebApplication app)
     {
@@ -42,15 +24,21 @@ public static class GameEndpoints
 
 
         // Get All Games:
-        group.MapGet("/", () => games);
+        group.MapGet("/", async (GameStoreContext dbContext) =>
+          await dbContext.Games
+                  .Include(game => game.Kind)
+                  .Select(game => game.ToDto())
+                  .AsNoTracking()
+                  .ToListAsync()
+         );
 
 
         // Get Specific Game:
-        group.MapGet("/{id}", handler: (int id) =>
+        group.MapGet("/{id}", handler: async (int id, GameStoreContext dbContext) =>
         {
-            GameDto? game = games.Find(game => game.ID == id);
+            Game? game = await dbContext.Games.FindAsync(id);
 
-            return game is null ? Results.NotFound() : Results.Ok(game);
+            return game is null ? Results.NotFound() : Results.Ok(game.ToDetailsDto());
 
 
         })
@@ -60,19 +48,16 @@ public static class GameEndpoints
 
 
         // Add New Game:
-        group.MapPost("/", (CreateGameDto NewGame) =>
+        group.MapPost("/", async (CreateGameDto NewGame, GameStoreContext dbContext) =>
         {
 
-            GameDto game = new(
-              games.Count + 1,
-              NewGame.GameName,
-              NewGame.Kind,
-              NewGame.Price,
-              NewGame.ReleaseDate
 
-              );
-            games.Add(game);
-            return Results.CreatedAtRoute(GetGameEndPoint, new { id = game.ID }, game);
+            Game game = NewGame.ToEntity();
+
+            dbContext.Games.Add(game);
+            await dbContext.SaveChangesAsync();
+
+            return Results.CreatedAtRoute(GetGameEndPoint, new { id = game.Id }, game.ToDetailsDto());
 
 
         }
@@ -82,23 +67,21 @@ public static class GameEndpoints
 
 
         // Update Game:
-        group.MapPut("/{id}", (int id, UpdateGameDto UpdatedGame) =>
+        group.MapPut("/{id}", async (int id, UpdateGameDto UpdatedGame, GameStoreContext dbContext) =>
         {
-            int Index = games.FindIndex(game => game.ID == id);
 
-            if (Index == -1)
+            var existingGame = await dbContext.Games.FindAsync(id);
+
+            if (existingGame is null)
             {
                 return Results.NotFound();
             }
 
-            games[Index] = new GameDto(
-                id,
-                UpdatedGame.GameName,
-                UpdatedGame.Kind,
-                UpdatedGame.Price,
-                UpdatedGame.ReleaseDate
-            );
+            dbContext.Entry(existingGame)
+                     .CurrentValues
+                     .SetValues(UpdatedGame.ToEntity(id));
 
+            await dbContext.SaveChangesAsync();
             return Results.NoContent();
 
 
@@ -107,19 +90,15 @@ public static class GameEndpoints
 
 
         // Delete Game:
-        group.MapDelete("/{id}", (int id) =>
+        group.MapDelete("/{id}", async (int id, GameStoreContext dbContext) =>
         {
-            games.RemoveAll(game => game.ID == id);
+            await dbContext.Games
+                      .Where(game => game.Id == id)
+                      .ExecuteDeleteAsync();
             return Results.NoContent();
         });
 
 
-        // Delete All Games
-        group.MapDelete("/", () =>
-        {
-            games.Clear();
-            return Results.NoContent();
-        });
 
         return group;
     }

@@ -10,8 +10,8 @@ Content-Type: application/json
 
 {
   "GameName":"New Game",
-  "Kind": "JJJ",
-  "Price": 2000,
+  "KindId": 4,
+  "Price": 12.5,
   "ReleaseDate": "2002-06-11"
 }
 
@@ -20,10 +20,10 @@ PUT  http://localhost:5091/games/1
 Content-Type: application/json
 
 {
-  "GameName": "Street Fighter II",
-  "Kind": "Fighting",
-  "Price": 1000.99,
-  "ReleaseDate": "1999-07-15"
+  "GameName": "Street Fighter IIjj",
+  "KindId": 4,
+  "Price": 11.80,
+  "ReleaseDate": "2002-06-11"
 }
 
 ###
