@@ -110,8 +110,7 @@ await app.MigrateDbAsync();
 4.  **Run the Application**   
      ```bash
       dotnet run
-
-
+      ```
    
 
 
