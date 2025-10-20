@@ -1,3 +1,4 @@
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -44,7 +45,7 @@ public static class AuthEndpoints
             });
         });
 
-        group.MapPost("/login", async (RegisterDto loginDto, GameStoreContext db) =>
+        group.MapPost("/login", async (RegisterDto loginDto, GameStoreContext db, IConfiguration config) =>
         {
             var user = await db.Users.SingleOrDefaultAsync(user => user.UserName == loginDto.UserName);
             if (user == null)
@@ -56,23 +57,31 @@ public static class AuthEndpoints
             if (result == PasswordVerificationResult.Failed)
                 return Results.Unauthorized();
 
+            var jwtSettings = config.GetSection("Jwt");
+            var keyString = jwtSettings["Key"] ?? throw new InvalidOperationException("JWT 'Key' is not configured.");
+            var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(keyString));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512);
 
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes("jumananaKeyyyy6112003humaid12113114JJJJJJJJJJJJJJUMANAMARWANHUMAID");
-            var tokenDescriptor = new SecurityTokenDescriptor
+            var claims = new[]
             {
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                    new Claim(ClaimTypes.Name, user.UserName),
-                    new Claim(ClaimTypes.Role, user.Role)
-                }),
-                Expires = DateTime.UtcNow.AddHours(5),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha512)
-            };
+                        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                        new Claim(ClaimTypes.Name, user.UserName),
+                        new Claim(ClaimTypes.Role, user.Role)
+                    };
 
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            var tokenString = tokenHandler.WriteToken(token);
+            var expireMinutesStr = jwtSettings["ExpireMinutes"] ?? throw new InvalidOperationException("JWT 'ExpireMinutes' is not configured.");
+            if (!double.TryParse(expireMinutesStr, out var expireMinutes))
+                throw new InvalidOperationException("JWT 'ExpireMinutes' is not a valid number.");
+
+            var token = new JwtSecurityToken(
+                issuer: jwtSettings["Issuer"],
+                audience: jwtSettings["Audience"],
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(expireMinutes),
+                signingCredentials: creds
+            );
+
+            var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
             return Results.Ok(new
             {
@@ -82,6 +91,7 @@ public static class AuthEndpoints
                 Token = tokenString
             });
         });
+
 
 
 
