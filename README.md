@@ -111,7 +111,13 @@ await app.MigrateDbAsync();
      ```bash
       dotnet run
       ```
-   
+ ---
+ ## 👩‍💻 Author
+ *Jumana Saif*
+ 
+**📘 GitHub Link: [GitHub](https://github.com/jumanasaif)**
+
+**💬 Built for learning and improving backend development skills with .NET.**
 
 
 
