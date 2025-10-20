@@ -7,7 +7,7 @@ using WebApp1_GameStore.Data;
 
 #nullable disable
 
-namespace WebApp1_GameStore.Data.Migrations
+namespace WebApp1_GameStore.Migrations
 {
     [DbContext(typeof(GameStoreContext))]
     partial class GameStoreContextModelSnapshot : ModelSnapshot
@@ -77,6 +77,41 @@ namespace WebApp1_GameStore.Data.Migrations
                         {
                             Id = 4,
                             Name = "Kids And Family"
+                        });
+                });
+
+            modelBuilder.Entity("WebApp1_GameStore.Entities.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserName")
+                        .IsUnique();
+
+                    b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            PasswordHash = "AQAAAAIAAYagAAAAEBjDpf3/6DHKCEd2+/teABhWA3JHze2Bmk4edGDBGaTyW0W7EmZz7CovpQlX1+Q31g==",
+                            Role = "Admin",
+                            UserName = "Admin"
                         });
                 });
 

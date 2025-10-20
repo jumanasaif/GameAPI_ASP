@@ -9,23 +9,40 @@ POST http://localhost:5091/games
 Content-Type: application/json
 
 {
-  "GameName":"New Game",
+  "GameName":"Super Mario",
   "KindId": 4,
-  "Price": 12.5,
-  "ReleaseDate": "2002-06-11"
+  "Price": 18.5,
+  "ReleaseDate": "2025-10-12"
 }
 
 ###
-PUT  http://localhost:5091/games/1
+PUT  http://localhost:5091/games/2
 Content-Type: application/json
 
 {
   "GameName": "Street Fighter IIjj",
-  "KindId": 4,
+  "KindId": 2,
   "Price": 11.80,
   "ReleaseDate": "2002-06-11"
 }
 
 ###
 
-DELETE http://localhost:5091/games/4
+DELETE http://localhost:5091/games/1
+###
+POST http://localhost:5091/auth/register
+Content-Type: application/json
+
+{
+  "userName": "JJJJ",
+  "password": "JJJJ"
+}
+
+###
+POST http://localhost:5091/auth/login
+Content-Type: application/json
+
+{
+  "userName": "JJJJ",
+  "password": "JJJJ"
+}

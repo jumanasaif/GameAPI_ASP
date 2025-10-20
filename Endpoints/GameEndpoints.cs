@@ -1,106 +1,66 @@
-using System;
-using Microsoft.EntityFrameworkCore;
-using SQLitePCL;
-using WebApp1_GameStore.Data;
+using Microsoft.AspNetCore.Authorization;
 using WebApp1_GameStore.DTOs;
 using WebApp1_GameStore.Entities;
 using WebApp1_GameStore.Mapping;
+using WebApp1_GameStore.Repositories;
 
 namespace WebApp1_GameStore.Endpoints;
 
 public static class GameEndpoints
 {
-
     const string GetGameEndPoint = "GetGame";
-
 
     public static RouteGroupBuilder MapGameEndPoints(this WebApplication app)
     {
-
-        var group = app.MapGroup("games")
-                                          .WithParameterValidation();
+        var group = app.MapGroup("games").WithParameterValidation();
 
 
-
-
-        // Get All Games:
-        group.MapGet("/", async (GameStoreContext dbContext) =>
-          await dbContext.Games
-                  .Include(game => game.Kind)
-                  .Select(game => game.ToDto())
-                  .AsNoTracking()
-                  .ToListAsync()
-         );
-
-
-        // Get Specific Game:
-        group.MapGet("/{id}", handler: async (int id, GameStoreContext dbContext) =>
+        group.MapGet("/", async (IGameRepository repository) =>
         {
-            Game? game = await dbContext.Games.FindAsync(id);
+            var games = await repository.GetAllAsync();
+            var result = games.Select(g => g.ToDto());
+            return Results.Ok(result);
+        });
 
+
+        group.MapGet("/{id}", async (int id, IGameRepository repository) =>
+        {
+            var game = await repository.GetGameAsync(id);
             return game is null ? Results.NotFound() : Results.Ok(game.ToDetailsDto());
-
-
-        })
-        .WithName(GetGameEndPoint);
+        }).WithName(GetGameEndPoint);
 
 
 
-
-        // Add New Game:
-        group.MapPost("/", async (CreateGameDto NewGame, GameStoreContext dbContext) =>
+        group.MapPost("/", [Authorize(Roles = "Admin")] async (CreateGameDto newGame, IGameRepository repository) =>
         {
-
-
-            Game game = NewGame.ToEntity();
-
-            dbContext.Games.Add(game);
-            await dbContext.SaveChangesAsync();
-
+            var game = newGame.ToEntity();
+            await repository.CreateGameAsync(game);
             return Results.CreatedAtRoute(GetGameEndPoint, new { id = game.Id }, game.ToDetailsDto());
-
-
-        }
-
-        );
-
-
-
-        // Update Game:
-        group.MapPut("/{id}", async (int id, UpdateGameDto UpdatedGame, GameStoreContext dbContext) =>
-        {
-
-            var existingGame = await dbContext.Games.FindAsync(id);
-
-            if (existingGame is null)
-            {
-                return Results.NotFound();
-            }
-
-            dbContext.Entry(existingGame)
-                     .CurrentValues
-                     .SetValues(UpdatedGame.ToEntity(id));
-
-            await dbContext.SaveChangesAsync();
-            return Results.NoContent();
-
-
-
         });
 
 
-        // Delete Game:
-        group.MapDelete("/{id}", async (int id, GameStoreContext dbContext) =>
+
+        group.MapPut("/{id}", [Authorize(Roles = "Admin")] async (int id, UpdateGameDto dto, IGameRepository repository) =>
         {
-            await dbContext.Games
-                      .Where(game => game.Id == id)
-                      .ExecuteDeleteAsync();
+            var existing = await repository.GetGameAsync(id);
+            if (existing == null) return Results.NotFound();
+
+            existing.GameName = dto.GameName;
+            existing.KindId = dto.KindId;
+            existing.Price = dto.Price;
+            existing.ReleaseDate = dto.ReleaseDate;
+
+            await repository.UpdateGameAsync(existing);
             return Results.NoContent();
         });
 
 
+        group.MapDelete("/{id}", [Authorize(Roles = "Admin")] async (int id, IGameRepository repository) =>
+        {
+            await repository.DeleteGameAsync(id);
+            return Results.NoContent();
+        });
 
         return group;
     }
-
 }

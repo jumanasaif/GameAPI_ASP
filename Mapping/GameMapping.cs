@@ -40,7 +40,7 @@ public static class GameMapping
         return new(
                game.Id,
                game.GameName,
-               game.Kind!.Name,
+               game.Kind?.Name ?? "Unknown",
                game.Price,
                game.ReleaseDate
             );
