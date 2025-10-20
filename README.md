@@ -9,7 +9,8 @@ This API simulates a small **Game Store system** where users can register, log i
 
 This project is **not a large-scale API**, but rather a **learning-oriented project** built to understand and practice:
 
-- ✅ **Entity Framework Core** (Database management)
+- ✅ **Entity Framework Core** (for database managment "ORM")
+- ✅ **Dependency Injection (DI)** (to manage services and dependencies efficiently)
 - ✅ **Repository Pattern** (Data access layer separation)
 - ✅ **Minimal APIs** (Lightweight endpoint setup)
 - ✅ **Authentication & Authorization** using **JWT**
@@ -89,9 +90,29 @@ The database is automatically created and migrated when the app starts:
 
 ```csharp
 await app.MigrateDbAsync();
-
+```
 ---
+## ⚙️ How to Run
 
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/jumanasaif/GameAPI_ASP.git
+   
+2. **Open the Project** 
+    Open the solution file (.sln) using Visual Studio or Visual Studio Code.
+    
+3.  **Set Up the Database**
+    Make sure your connection string in appsettings.json is correct.
+    Run the following command to apply migrations:
+     ```bash
+     dotnet ef database update
+
+4.  **Run the Application**   
+     ```bash
+      dotnet run
+
+
+   
 
 
 
