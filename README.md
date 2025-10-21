@@ -115,8 +115,8 @@ await app.MigrateDbAsync();
  ## 👩‍💻 Author
  *Jumana Saif*
  
-**📘 GitHub Link: [GitHub](https://github.com/jumanasaif)**
-
+**📘  [GitHub](https://github.com/jumanasaif)**
+**📧 [Email](jumanasaif2003@gmail.com)**
 **💬 Built for learning and improving backend development skills with .NET.**
 
 
