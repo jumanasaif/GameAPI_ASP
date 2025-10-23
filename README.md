@@ -1,6 +1,6 @@
 # 🎮 Game Store API
 
-A simple **.NET 8 Web API** project built to learn and demonstrate the **core backend concepts** in a clean and structured way.  
+A simple **.NET Web API** project built to learn and demonstrate the **core backend concepts** in a clean and structured way.  
 This API simulates a small **Game Store system** where users can register, log in, and manage games by category.
 
 ---
